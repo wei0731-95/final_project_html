@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>質感拖曳行事曆</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h1>我的事件</h1>
+            <div class="event-creator">
+                <input type="text" id="newEventInput" placeholder="輸入新事件名稱...">
+                <button id="addEventBtn">新增</button>
+            </div>
+            <div class="event-list" id="eventList">
+            </div>
+            <h2 class="sidebar-subtitle">固定事件 (每週)</h2>
+            <div class="recurring-creator">
+                <input type="text" id="recurringEventInput" placeholder="事件名稱...">
+                <select id="recurringDaySelect">
+                    <option value="0">週日</option>
+                    <option value="1">週一</option>
+                    <option value="2">週二</option>
+                    <option value="3">週三</option>
+                    <option value="4">週四</option>
+                    <option value="5">週五</option>
+                    <option value="6">週六</option>
+                </select>
+                <button id="addRecurringBtn">新增固定事件</button>
+            </div>
+            <div class="recurring-event-list" id="recurringEventList">
+            </div>
+        </aside>
+
+        <main class="calendar-section">
+            <div class="calendar-header">
+                <button id="prevMonthBtn">◀</button>
+                <h2 id="currentMonthYear"></h2>
+                <button id="nextMonthBtn">▶</button>
+            </div>
+            <div class="calendar-weekdays">
+                <div>日</div>
+                <div>一</div>
+                <div>二</div>
+                <div>三</div>
+                <div>四</div>
+                <div>五</div>
+                <div>六</div>
+            </div>
+            <div class="calendar-grid" id="calendarGrid">
+            </div>
+        </main>
+    </div>
+
+    <div id="modal-backdrop" class="modal-backdrop hidden">
+        <div id="event-modal">
+            <h3 id="modal-title">事件詳情</h3>
+            <div id="modal-daily-list" class="modal-daily-list"></div>
+            <div class="modal-create-action">
+                <button id="show-create-form-btn">+ 新增事件</button>
+            </div>
+            <div class="modal-form-content">
+                <label for="modal-event-name">事件名稱:</label>
+                <input type="text" id="modal-event-name" placeholder="輸入事件名稱...">
+                <label for="modal-event-start">開始時間:</label>
+                <input type="time" id="modal-event-start">
+                <label for="modal-event-end">結束時間:</label>
+                <input type="time" id="modal-event-end">
+                <label for="modal-event-desc">備註:</label>
+                <textarea id="modal-event-desc" rows="3" placeholder="輸入備註..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button id="modal-save-btn">儲存</button>
+                <button id="modal-delete-btn">刪除</button>
+            </div>
+            <div class="modal-footer">
+                <button id="modal-close-btn">關閉</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="message-modal-backdrop" class="modal-backdrop hidden">
+        <div class="message-modal-content">
+            <h3 id="msg-title">提示</h3>
+            <p id="msg-body"></p>
+            <div class="modal-actions" style="justify-content: flex-end; margin-top: 20px;">
+                <button id="msg-cancel-btn" style="background-color: #e0e6ed; color: #333; margin-right: 10px;">取消</button>
+                <button id="msg-confirm-btn">確定</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
