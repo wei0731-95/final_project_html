@@ -1,23 +1,53 @@
 :root {
-    --primary-color: #8bb2f1;
-    --primary-dark: #6a89cc;
-    --accent-color: #ff9f43;
-    --bg-color: #f4f7fc;
-    --card-bg: #ffffff;
-    --text-color: #4a4a4a;
-    --text-light: #888888;
-    --border-color: #e0e6ed;
-    --shadow-soft: 0 8px 24px rgba(149, 157, 165, 0.1);
-    --radius-lg: 16px;
-    --radius-md: 10px;
-    --radius-sm: 6px;
+    /* --- 核心色票 (淺色模式：清新質感) --- */
+    /* 背景改為漸層 */
+    --bg-gradient: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+    
+    /* 毛玻璃核心變數 */
+    --glass-bg: rgba(255, 255, 255, 0.65);       /* 主容器背景 (高透明) */
+    --sidebar-bg: rgba(255, 255, 255, 0.3);      /* 側邊欄背景 (更透明) */
+    --glass-border: rgba(255, 255, 255, 0.6);    /* 亮邊框 */
+    --card-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15); /* 柔和陰影 */
+    
+    --primary-color: #8c7ae6; /* 質感紫 */
+    --primary-dark: #6c5ce7;
+    --text-color: #2d3436;
+    --text-light: #636e72;
+    --border-color: rgba(255, 255, 255, 0.4);
+    
+    --calendar-day-hover: rgba(255, 255, 255, 0.8);
+    
+    --radius-lg: 20px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+    
+    --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* --- 深色模式 (Dark Mode：深邃科技感) --- */
+[data-theme="dark"] {
+    --bg-gradient: linear-gradient(135deg, #1e1e2f 0%, #2d2d44 100%); /* 深藍紫漸層 */
+    
+    --glass-bg: rgba(30, 30, 46, 0.7);     /* 深色玻璃 */
+    --sidebar-bg: rgba(0, 0, 0, 0.2);      /* 側邊欄稍微變暗 */
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    
+    --primary-color: #a29bfe; /* 亮紫色 */
+    --primary-dark: #8c7ae6;
+    --text-color: #dfe6e9;
+    --text-light: #b2bec3;
+    --border-color: rgba(255, 255, 255, 0.1);
+    
+    --calendar-day-hover: rgba(255, 255, 255, 0.1);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
     font-family: 'Noto Sans TC', sans-serif;
-    background-color: var(--bg-color);
+    background: var(--bg-gradient); /* 套用漸層背景 */
+    background-attachment: fixed;   /* 讓背景固定不動 */
     color: var(--text-color);
     line-height: 1.6;
     min-height: 100vh;
@@ -25,20 +55,39 @@ body {
     flex-direction: column;
     align-items: center;
     padding: 20px;
+    transition: background 0.5s ease; /* 深淺切換時的過渡 */
 }
 
-/* 工具類：隱藏元素 (修復介面異常的關鍵) */
+/* 工具類 */
 .hidden { display: none !important; }
 
-/* 登入區塊 */
+/* 登入區塊 (維持原位置，只改質感) */
 .auth-section {
     width: 100%;
     max-width: 1200px;
     margin-bottom: 20px;
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-end; /* 維持靠右 */
     align-items: center;
+    position: relative;
+    z-index: 10;
 }
+
+/* 切換按鈕樣式 */
+#theme-toggle {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-color);
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(5px);
+    margin-right: 15px; /* 與使用者資訊的距離 */
+    transition: var(--transition);
+}
+#theme-toggle:hover { transform: scale(1.1); background: var(--primary-color); color: white;}
 
 .auth-btn {
     border: none;
@@ -47,46 +96,41 @@ body {
     cursor: pointer;
     font-size: 0.9em;
     font-weight: 500;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: var(--transition);
+    backdrop-filter: blur(5px);
 }
 
 .auth-btn.login {
-    background-color: white;
-    color: #555;
-    display: flex;
-    align-items: center;
+    background: var(--glass-bg);
+    color: var(--text-color);
+    border: 1px solid var(--glass-border);
+    display: flex; align-items: center;
 }
-
-.auth-btn.login:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
+.auth-btn.login:hover { transform: translateY(-2px); background: white; }
 
 .auth-btn.logout {
     background-color: #ff7675;
     color: white;
     margin-left: 15px;
 }
-
 .auth-btn.logout:hover { background-color: #d63031; }
 
 .google-icon {
-    font-weight: bold;
-    color: #4285F4;
-    margin-right: 8px;
-    font-size: 1.2em;
+    font-weight: bold; color: #4285F4; margin-right: 8px; font-size: 1.2em;
 }
 
 #user-info {
     display: flex;
     align-items: center;
-    background: white;
+    background: var(--glass-bg); /* 改為毛玻璃背景 */
     padding: 5px 15px;
     border-radius: 50px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(5px);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
+/* 你的圖片樣式完全保留 */
 .user-photo {
     width: 32px;
     height: 32px;
@@ -97,54 +141,61 @@ body {
 
 #user-name { font-weight: 500; color: var(--text-color); font-size: 0.95em; }
 
-/* 主容器 */
+/* 主容器 (最大的玻璃卡片) */
 .container {
     display: flex;
     width: 100%;
     max-width: 1200px;
-    background-color: var(--card-bg);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-soft);
-    overflow: hidden;
     height: 85vh;
+    
+    /* Glassmorphism 設定 */
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);         /* 背景模糊 */
+    -webkit-backdrop-filter: blur(12px); /* Safari 支援 */
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--card-shadow);
+    
+    overflow: hidden;
 }
 
 /* 左側邊欄 */
 .sidebar {
     flex: 0 0 280px;
     padding: 25px;
-    background-color: #f8faff;
+    background-color: var(--sidebar-bg); /* 微透明背景 */
     border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
 }
 
-.sidebar h1 { font-size: 1.5em; color: var(--primary-dark); margin-bottom: 20px; font-weight: 700; }
+.sidebar h1 { font-size: 1.5em; color: var(--text-color); margin-bottom: 20px; font-weight: 700; }
 
 .sidebar-subtitle {
     font-size: 1.1em;
-    color: var(--primary-dark);
-    margin-top: 25px;
-    margin-bottom: 15px;
-    font-weight: 700;
+    color: var(--text-color);
+    margin-top: 25px; margin-bottom: 15px; font-weight: 700;
     border-top: 1px solid var(--border-color);
     padding-top: 20px;
 }
 
+/* 輸入框美化 */
 input[type="text"], input[type="time"], select, textarea {
     padding: 10px 12px;
     border: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.4); /* 輸入框半透明 */
     border-radius: var(--radius-sm);
     font-size: 0.95em;
+    color: var(--text-color);
     transition: all 0.2s;
-    background-color: #fff;
     font-family: inherit;
 }
+
 
 input:focus, select:focus, textarea:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(139, 178, 241, 0.2);
+    background: rgba(255, 255, 255, 0.9);
 }
 
 button { font-family: inherit; }
@@ -160,66 +211,119 @@ button { font-family: inherit; }
     border-radius: var(--radius-sm);
     cursor: pointer;
     font-weight: 500;
-    transition: background-color 0.2s;
+    transition: var(--transition);
     white-space: nowrap;
 }
 
-#addEventBtn:hover, #addRecurringBtn:hover { background-color: var(--primary-dark); }
+#addEventBtn:hover, #addRecurringBtn:hover { 
+    background-color: var(--primary-dark); 
+    transform: translateY(-2px);
+}
 #recurringDaySelect { width: 100%; }
 #addRecurringBtn { width: 100%; padding: 8px; }
 
-.event-list, .recurring-event-list { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
+
+.event-list, .recurring-event-list { 
+    flex-grow: 1; 
+    overflow-y: auto; 
+    padding-right: 5px; 
+    
+    padding-top: 5px;   
+    padding-bottom: 5px;
+}
 .recurring-event-list { flex-grow: 0; max-height: 150px; }
 
+/* 捲軸美化 */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #dcdfe6; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #c0c4cc; }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.2); }
+[data-theme="dark"] ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
 
 .draggable-event, .recurring-event-item {
-    background-color: white;
+    background-color: var(--glass-bg);
+    border: 1px solid var(--border-color);
     color: var(--text-color);
     padding: 10px 12px;
     margin-bottom: 8px;
     border-radius: var(--radius-md);
     cursor: grab;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
-    border: 1px solid var(--border-color);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    display: flex; justify-content: space-between; align-items: center;
+    transition: var(--transition);
     font-size: 0.95em;
+    backdrop-filter: blur(2px);
 }
 
-.recurring-event-item { background-color: #f0f9f0; border-color: #d1e7dd; color: #2c5e40; }
-.draggable-event:hover, .recurring-event-item:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.08); }
+.recurring-event-item { background-color: rgba(46, 204, 113, 0.15); border-color: transparent; }
+
+.draggable-event:hover, .recurring-event-item:hover { 
+    transform: translateY(-2px); 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08); 
+    border-color: var(--primary-color);
+}
 .draggable-event.dragging { opacity: 0.5; background-color: var(--primary-color); color: white; }
 
-.delete-event-btn { opacity: 0.3; cursor: pointer; transition: opacity 0.2s; padding: 2px; }
-.delete-event-btn:hover { opacity: 1; }
+.delete-event-btn { opacity: 0.5; cursor: pointer; transition: 0.2s; padding: 2px; }
+.delete-event-btn:hover { opacity: 1; color: #ff7675; }
 
 /* 右側日曆 */
-.calendar-section { flex-grow: 1; padding: 30px; display: flex; flex-direction: column; background-color: #fff; }
+.calendar-section { 
+    flex-grow: 1; 
+    padding: 30px; 
+    display: flex; flex-direction: column; 
+    background-color: transparent; /* 背景透明，顯示毛玻璃 */
+}
 
 .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .calendar-header h2 { font-size: 1.8em; color: var(--text-color); }
 .calendar-header button {
-    background: #f0f2f5; border: none; width: 36px; height: 36px; border-radius: 50%;
-    color: var(--text-color); cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center;
+    background: var(--glass-bg);
+    border: 1px solid var(--border-color); 
+    width: 36px; height: 36px; border-radius: 50%;
+    color: var(--text-color); cursor: pointer; 
+    transition: var(--transition); 
+    display: flex; align-items: center; justify-content: center;
 }
-.calendar-header button:hover { background-color: var(--primary-color); color: white; }
+.calendar-header button:hover { background-color: var(--primary-color); color: white; border-color: transparent;}
 
-.calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-weight: 500; color: var(--text-light); margin-bottom: 10px; }
-.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(auto-fit, minmax(90px, 1fr)); gap: 10px; flex-grow: 1; }
+/* --- 日曆 Grid 修復與美化 --- */
+.calendar-weekdays { 
+    display: grid; 
+    grid-template-columns: repeat(7, 1fr); 
+    text-align: center; 
+    font-weight: 500; 
+    color: var(--text-light); 
+    margin-bottom: 10px; 
+}
+
+.calendar-grid { 
+    display: grid; 
+    grid-template-columns: repeat(7, 1fr); 
+    grid-template-rows: repeat(auto-fit, minmax(90px, 1fr)); 
+    gap: 10px; 
+    flex-grow: 1; 
+}
 
 .calendar-day {
-    background-color: #fff; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 8px;
-    display: flex; flex-direction: column; transition: all 0.2s; cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.3); /* 格子半透明 */
+    border: 1px solid var(--border-color); 
+    border-radius: var(--radius-md); 
+    padding: 8px;
+    display: flex; flex-direction: column; 
+    transition: var(--transition); 
+    cursor: pointer;
 }
-.calendar-day:hover { border-color: var(--primary-color); background-color: #fbfdff; }
-.calendar-day.empty-day { background-color: #fafafa; border: none; pointer-events: none; }
-.calendar-day.current-day { border: 2px solid var(--primary-color); background-color: #f8fbff; }
+[data-theme="dark"] .calendar-day { background-color: rgba(255, 255, 255, 0.05); }
+
+.calendar-day:hover { 
+    border-color: var(--primary-color); 
+    background-color: var(--calendar-day-hover); 
+    transform: scale(1.02);
+}
+
+.calendar-day.empty-day { background-color: transparent; border: none; pointer-events: none; }
+.calendar-day.current-day { border: 2px solid var(--primary-color); background-color: rgba(140, 122, 230, 0.1); }
 
 .day-number {
     font-size: 1em; font-weight: 500; color: var(--text-color); margin-bottom: 4px;
@@ -233,30 +337,36 @@ button { font-family: inherit; }
     cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: filter 0.2s;
 }
 .placed-event:hover { filter: brightness(1.1); }
-.placed-recurring-event { background-color: #a8d5ba; color: #2c5e40; border-left: 3px solid #5cb85c; }
-.calendar-day.drag-over { background-color: #eef5ff; border: 2px dashed var(--primary-color); transform: scale(0.98); }
+.placed-recurring-event { background-color: #55efc4; color: #2d3436; border-left: 3px solid #00b894; }
+.calendar-day.drag-over { background-color: rgba(140, 122, 230, 0.2); border: 2px dashed var(--primary-color); transform: scale(0.98); }
 
-/* --- Modal 彈窗 (定位修復) --- */
+/* --- Modal 彈窗 */
 .modal-backdrop {
-    position: fixed; /* 重要：讓它浮動 */
-    top: 0; left: 0; width: 100%; height: 100%;
-    background-color: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(5px);
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.4); 
+    backdrop-filter: blur(5px); 
     z-index: 1000;
     display: flex; justify-content: center; align-items: center;
 }
 
 #event-modal, .message-modal-content {
-    background-color: white; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-    border: 1px solid rgba(255,255,255,0.8);
+    background-color: var(--glass-bg); 
+    border-radius: 20px; 
+    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    border: 1px solid var(--glass-border);
     animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     max-width: 90%;
+    backdrop-filter: blur(100px); 
+    /* 強力模糊 */
+    color: var(--text-color);
 }
+/* 深色模式彈窗調低透明度，不然文字看不清楚 */
+[data-theme="dark"] #event-modal { background-color: rgba(30, 30, 46, 0.9); }
 
 @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
 
 #event-modal { padding: 30px; width: 450px; }
-#event-modal h3 { text-align: center; color: var(--primary-dark); margin-bottom: 20px; }
+#event-modal h3 { text-align: center; color: var(--text-color); margin-bottom: 20px; }
 
 .time-inputs { display: flex; gap: 15px; }
 .time-inputs div { flex: 1; }
@@ -266,16 +376,203 @@ button { font-family: inherit; }
 
 #modal-save-btn, #msg-confirm-btn { background-color: var(--primary-color); color: white; }
 #modal-save-btn:hover, #msg-confirm-btn:hover { background-color: var(--primary-dark); }
-#modal-delete-btn { background-color: #ffcccc; color: #d63031; }
-#modal-delete-btn:hover { background-color: #ffb3b3; }
-#modal-close-btn { background-color: #f0f2f5; color: #666; }
+#modal-delete-btn { background-color: rgba(255, 118, 117, 0.2); color: #d63031; }
+#modal-delete-btn:hover { background-color: #ff7675; color: white; }
+#modal-close-btn { background-color: rgba(0,0,0,0.05); color: var(--text-color); }
 
-.daily-list-item { background-color: #fff; border: 1px solid #f0f0f0; padding: 12px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+.daily-list-item { 
+    background-color: rgba(255,255,255,0.5); 
+    border: 1px solid var(--border-color); 
+    padding: 12px; border-radius: 10px; margin-bottom: 10px; 
+}
+[data-theme="dark"] .daily-list-item { background-color: rgba(255,255,255,0.05); }
+
 .daily-list-item h4 { color: var(--text-color); margin-bottom: 5px; }
-.daily-list-item.recurring { background-color: #f9fff9; border-color: #e0f0e0; }
+.daily-list-item.recurring { background-color: rgba(85, 239, 196, 0.2); border-color: transparent; }
 
 @media (max-width: 900px) {
-    .container { flex-direction: column; height: auto; max-height: none; }
-    .sidebar { flex: none; width: 100%; border-right: none; border-bottom: 1px solid var(--border-color); }
+    .container { flex-direction: column; height: auto; max-height: none; background: transparent; border: none; box-shadow: none; backdrop-filter: none;}
+    .sidebar { flex: none; width: 100%; border-right: none; border-bottom: 1px solid var(--border-color); background: var(--glass-bg); margin-bottom: 10px; border-radius: var(--radius-lg); backdrop-filter: blur(12px);}
+    .calendar-section { background: var(--glass-bg); border-radius: var(--radius-lg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border);}
     .calendar-grid { grid-template-rows: repeat(auto-fit, minmax(80px, 1fr)); }
+}
+
+
+/* 深色模式：時間輸入框*/
+
+[data-theme="dark"] #modal-event-start,
+[data-theme="dark"] #modal-event-end,
+[data-theme="dark"] input[type="time"],
+[data-theme="dark"] input[type="date"] {
+    background-color: rgba(60, 60, 80, 0.9) !important; /* 深灰色底 */
+    color: #ffffff !important;       /* 純白文字 */
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    
+    color-scheme: dark !important; 
+}
+
+/* 當點選輸入框時 */
+[data-theme="dark"] #modal-event-start:focus,
+[data-theme="dark"] #modal-event-end:focus,
+[data-theme="dark"] input[type="time"]:focus {
+    background-color: #2d2d44 !important; /* 不透明深藍底 */
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 3px rgba(140, 122, 230, 0.3);
+}
+
+
+[data-theme="dark"] input[type="text"],
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] ::placeholder {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+[data-theme="dark"] select option {
+    background-color: #2d2d44;
+    color: #fff;
+}
+
+/* 時間下拉選單 */
+.time-select {
+    width: 100%;
+    padding: 10px 15px;
+    padding-right: 35px; 
+    
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background-color: rgba(255, 255, 255, 0.4);
+    color: var(--text-color);
+    font-size: 1rem;
+    cursor: pointer;
+    
+    background: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236c5ce7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") 
+                no-repeat          
+                right 10px center  
+                / 14px;            
+    
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    
+    transition: all 0.2s;
+}
+
+.time-select:hover {
+    border-color: var(--primary-color);
+    background-color: rgba(255, 255, 255, 0.6);
+}
+
+[data-theme="dark"] .time-select {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+
+    background: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") 
+                no-repeat 
+                right 10px center 
+                / 14px;
+}
+
+[data-theme="dark"] .time-select option {
+    background-color: #2d2d44;
+    color: white;
+    padding: 10px;
+}
+
+/* 事件分類標籤顏色系統 */
+
+/* 1. 定義分類顏色變數 (方便統一管理) */
+:root {
+    --cat-default: #8bb2f1; /* 預設藍 */
+    --cat-work: #5e60ce;    /* 深藍紫 (工作) */
+    --cat-personal: #00b894;/* 青綠色 (個人) */
+    --cat-important: #ff7675;/* 紅色 (重要) */
+    --cat-learning: #fdcb6e;/* 黃色 (學習) */
+}
+
+/* 2. 行事曆上的小膠囊 (Pills) 樣式 */
+.placed-event.cat-default { background-color: var(--cat-default); }
+.placed-event.cat-work { background-color: var(--cat-work); }
+.placed-event.cat-personal { background-color: var(--cat-personal); }
+.placed-event.cat-important { background-color: var(--cat-important); }
+.placed-event.cat-learning { background-color: var(--cat-learning); color: #2d3436; /* 黃色背景配深字比較清楚 */ }
+
+/* 3. 左側列表卡片 (List Items) 樣式 */
+
+.draggable-event { border-left-width: 5px; } /* 加粗左邊框 */
+
+.draggable-event.cat-default { border-left-color: var(--cat-default); }
+.draggable-event.cat-work { border-left-color: var(--cat-work); }
+.draggable-event.cat-personal { border-left-color: var(--cat-personal); }
+.draggable-event.cat-important { border-left-color: var(--cat-important); }
+.draggable-event.cat-learning { border-left-color: var(--cat-learning); }
+
+/* 4. 分類選單的美化 (讓它跟時間選單一樣漂亮) */
+.category-select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background-color: rgba(255,255,255,0.5);
+    color: var(--text-color);
+}
+[data-theme="dark"] .category-select {
+    background-color: rgba(255,255,255,0.1);
+    color: white;
+    border-color: rgba(255,255,255,0.2);
+}
+[data-theme="dark"] .category-select option {
+    background-color: #2d2d44;
+    color: white;
+}
+
+/* 側邊欄快速新增區優化 */
+.event-creator {
+    display: flex;       
+    gap: 5px;            
+    align-items: center; 
+}
+
+
+.event-creator input[type="text"] {
+    flex-grow: 1;
+    width: auto; 
+}
+
+/* 快速選單的小圓點樣式 */
+.quick-select {
+    width: 85px;        
+    height: 40px;        
+    padding: 0 5px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background-color: rgba(255, 255, 255, 0.2); /* 半透明 */
+    color: var(--text-color);
+    cursor: pointer;
+    font-size: 1.2rem;   
+    text-align: left;
+    appearance: none;
+    -webkit-appearance: none; 
+}
+
+.quick-select:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-color: var(--primary-color);
+}
+
+/* 深色模式微調 */
+[data-theme="dark"] .quick-select {
+    background-color: rgba(0, 0, 0, 0.3);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+[data-theme="dark"] .quick-select option {
+    background-color: #2d2d44; /* 選單展開後的背景色 */
 }

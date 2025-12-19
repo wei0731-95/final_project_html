@@ -63,6 +63,7 @@ const prevMonthBtn = document.getElementById('prevMonthBtn');
 const nextMonthBtn = document.getElementById('nextMonthBtn');
 const calendarGrid = document.getElementById('calendarGrid');
 const newEventInput = document.getElementById('newEventInput');
+const quickCategorySelect = document.getElementById('quickCategorySelect');
 const addEventBtn = document.getElementById('addEventBtn');
 const eventList = document.getElementById('eventList');
 
@@ -70,6 +71,7 @@ const recurringEventInput = document.getElementById('recurringEventInput');
 const recurringDaySelect = document.getElementById('recurringDaySelect');
 const addRecurringBtn = document.getElementById('addRecurringBtn');
 const recurringEventList = document.getElementById('recurringEventList');
+
 
 // Modal DOM
 const modalBackdrop = document.getElementById('modal-backdrop');
@@ -79,6 +81,7 @@ const modalCloseBtn = document.getElementById('modal-close-btn');
 const modalDeleteBtn = document.getElementById('modal-delete-btn');
 const modalSaveBtn = document.getElementById('modal-save-btn');
 const modalEventName = document.getElementById('modal-event-name');
+const modalEventCategory = document.getElementById('modal-event-category'); 
 const modalEventStart = document.getElementById('modal-event-start');
 const modalEventEnd = document.getElementById('modal-event-end');
 const modalEventDesc = document.getElementById('modal-event-desc');
@@ -179,19 +182,20 @@ function startListeningToFirestore(uid) {
 }
 
 
-// --- 3. 資料庫操作 (取代原本的 localStorage) ---
+//資料庫操作 (取代原本的 localStorage)
 
 // 新增一般事件
-async function addEventToDB(name) {
+async function addEventToDB(name, category) { 
     if (!currentUser) return alert("請先登入！");
     try {
         await addDoc(collection(db, "events"), {
             uid: currentUser.uid,
             name: name,
+            category: category || 'default', // ★ 這裡儲存傳進來的分類
             startTime: "",
             endTime: "",
             description: "",
-            placedDates: [], // 剛建立時還沒排日期
+            placedDates: [],
             createdAt: new Date()
         });
     } catch (e) {
@@ -249,33 +253,42 @@ function timeToMinutes(timeStr) {
 }
 
 // 衝突檢查
-function checkTimeConflict(date, newStartStr, newEndStr, ignoreId) {
-    if (!newStartStr || !newEndStr) return false;
+function getConflictingEvent(date, newStartStr, newEndStr, ignoreId) {
+    if (!newStartStr || !newEndStr) return null;
     const newStart = timeToMinutes(newStartStr);
     const newEnd = timeToMinutes(newEndStr);
 
+    // 1. 檢查一般事件
     if (placedEvents[date]) {
         for (const event of placedEvents[date]) {
             if (event.id === ignoreId) continue;
             if (!event.startTime || !event.endTime) continue;
             const s = timeToMinutes(event.startTime);
             const e = timeToMinutes(event.endTime);
-            if (newStart < e && newEnd > s) return true;
+
+            if (newStart < e && newEnd > s) {
+                return { ...event, conflictType: 'normal' };
+            }
         }
     }
 
+    // 2. 檢查循環事件
     const dayOfWeek = new Date(date + 'T00:00:00').getDay();
     for (const recurEvent of recurringEvents) {
         if (recurEvent.id === ignoreId) continue;
         const isException = recurEvent.exceptions && recurEvent.exceptions.includes(date);
+        
         if (recurEvent.dayOfWeek === dayOfWeek && !isException) {
             if (!recurEvent.startTime || !recurEvent.endTime) continue;
             const s = timeToMinutes(recurEvent.startTime);
             const e = timeToMinutes(recurEvent.endTime);
-            if (newStart < e && newEnd > s) return true;
+            
+            if (newStart < e && newEnd > s) {
+                return { ...recurEvent, conflictType: 'recurring' };
+            }
         }
     }
-    return false;
+    return null; // 都沒衝突
 }
 
 // 渲染列表
@@ -284,6 +297,7 @@ function renderEventList() {
     userEvents.forEach(event => {
         const eventDiv = document.createElement('div');
         eventDiv.classList.add('draggable-event');
+        eventDiv.classList.add(`cat-${event.category || 'default'}`);
         eventDiv.setAttribute('draggable', 'true');
         
         eventDiv.dataset.eventName = event.name; 
@@ -339,8 +353,9 @@ function renderRecurringEventList() {
 // 按鈕事件：新增
 addEventBtn.addEventListener('click', () => {
     const val = newEventInput.value.trim();
+    const cat = quickCategorySelect.value;
     if(val) {
-        addEventToDB(val);
+        addEventToDB(val, cat);
         newEventInput.value = '';
     }
 });
@@ -429,6 +444,7 @@ function renderPlacedEvents() {
             placedEvents[date].forEach(eventData => {
                 const div = document.createElement('div');
                 div.classList.add('placed-event');
+                div.classList.add(`cat-${eventData.category || 'default'}`);
                 div.textContent = eventData.name; 
                 div.setAttribute('draggable', 'true');
                 div.addEventListener('dragstart', (e) => {
@@ -533,6 +549,9 @@ function openEditModal(eventData, date, type) {
     modalSaveBtn.style.display = 'inline-block';
     
     modalEventName.value = eventData.name;
+    if(modalEventCategory) {
+        modalEventCategory.value = eventData.category || 'default';
+    }
     modalEventStart.value = eventData.startTime || '';
     modalEventEnd.value = eventData.endTime || '';
     modalEventDesc.value = eventData.description || '';
@@ -540,23 +559,49 @@ function openEditModal(eventData, date, type) {
     modalBackdrop.classList.remove('hidden');
 }
 
+// 儲存按鈕邏輯 (加入取代功能)
 modalSaveBtn.addEventListener('click', () => {
     const { date, id, type, mode } = currentEditingEvent;
     const name = modalEventName.value.trim();
+    const category = modalEventCategory.value;
     const start = modalEventStart.value;
     const end = modalEventEnd.value;
     const desc = modalEventDesc.value.trim();
 
     if (!name) return showAlert("請輸入名稱");
-    if (start && end && start >= end) return showAlert("時間有誤");
+    if (start && end && start >= end) return showAlert("結束時間必須晚於開始時間");
 
-    // 衝突檢查
-    if (checkTimeConflict(date, start, end, id)) {
-        showConfirm("時間衝突，確定要儲存嗎？", () => doSave());
+    // 檢查是否有衝突
+    const conflictEvent = getConflictingEvent(date, start, end, id);
+
+    if (conflictEvent) {
+        // 發現衝突，詢問是否取代
+        let msg = `時間與「${conflictEvent.name}」衝突。\n確定要刪除舊行程並取代嗎？`;
+        
+        if (conflictEvent.conflictType === 'recurring') {
+            msg = `時間與固定行程「${conflictEvent.name}」衝突。\n確定要取代這一次的行程嗎？`;
+        }
+
+        showConfirm(msg, async () => {
+            
+            // A. 先刪除擋路的舊事件
+            if (conflictEvent.conflictType === 'normal') {
+                // 如果是一般事件，直接從資料庫刪除
+                await deleteEventFromDB("events", conflictEvent.id);
+            } else {
+                // 如果是循環事件，把今天加入「例外清單」(隱藏這一次)
+                const newExc = [...(conflictEvent.exceptions || []), date];
+                await updateEventInDB("recurring_events", conflictEvent.id, { exceptions: newExc });
+            }
+
+            doSave(); 
+        });
     } else {
+        // 沒有衝突，直接存
         doSave();
     }
 
+    // 執行儲存的動作 (封裝起來)
     function doSave() {
         if (type === 'recurring') {
             updateEventInDB("recurring_events", id, {
@@ -565,15 +610,18 @@ modalSaveBtn.addEventListener('click', () => {
         } else {
             // Normal Event
             if (mode === 'edit') {
-                // 更新該事件本身資料
                 updateEventInDB("events", id, {
-                    name, startTime: start, endTime: end, description: desc
+                    name, 
+                    category: category, // ★ 新增這行：更新分類
+                    startTime: start, 
+                    endTime: end, 
+                    description: desc
                 });
             } else {
-                // 在日曆點擊新增事件 (Create Mode)
                 addDoc(collection(db, "events"), {
                     uid: currentUser.uid,
                     name: name,
+                    category: category,
                     startTime: start,
                     endTime: end,
                     description: desc,
@@ -695,7 +743,57 @@ nextMonthBtn.addEventListener('click', () => {
     currentMonth++; if(currentMonth>11){currentMonth=0;currentYear++;} renderCalendar();
 });
 
+
 document.addEventListener('DOMContentLoaded', () => {
-    renderCalendar(); // 先畫空日曆
-    // onAuthStateChanged 會自動負責載入資料
+    const timeSelects = document.querySelectorAll('.time-select');
+    
+    const timeOptions = [];
+    for(let h=0; h<24; h++) {
+        for(let m=0; m<60; m+=10) { //改動時間部分
+            const hour = h.toString().padStart(2, '0');
+            const min = m.toString().padStart(2, '0');
+            timeOptions.push(`${hour}:${min}`);
+        }
+    }
+
+    timeSelects.forEach(select => {
+        timeOptions.forEach(time => {
+            const option = document.createElement('option');
+            option.value = time;
+            option.textContent = time;
+            select.appendChild(option);
+        });
+    });
+
+    document.getElementById('modal-event-start').value = "09:00";
+    document.getElementById('modal-event-end').value = "10:00";
+
+    renderCalendar();
 });
+
+// 深色模式切換邏輯 
+const themeToggleBtn = document.getElementById('theme-toggle');
+const htmlElement = document.documentElement;
+
+// 讀取使用者之前的設定
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme) {
+    htmlElement.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+}
+
+themeToggleBtn.addEventListener('click', () => {
+    const currentTheme = htmlElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    htmlElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme); // 記憶設定
+    updateThemeIcon(newTheme);
+});
+
+function updateThemeIcon(theme) {
+    // 切換按鈕的圖示
+    themeToggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
+}
+
+
