@@ -52,6 +52,7 @@ const dayNames = ["週日", "週一", "週二", "週三", "週四", "週五", "�
 let currentEditingEvent = { date: null, id: null, mode: 'create', type: 'normal' };
 
 // --- DOM 元素 ---
+const recurringCategorySelect = document.getElementById('recurringCategorySelect');
 const loginBtn = document.getElementById('login-btn');
 const logoutBtn = document.getElementById('logout-btn');
 const userInfo = document.getElementById('user-info');
@@ -205,13 +206,14 @@ async function addEventToDB(name, category) {
 }
 
 // 新增循環事件
-async function addRecurringEventToDB(name, dayOfWeek) {
+async function addRecurringEventToDB(name, dayOfWeek, category) { // <-- 加上 category 參數
     if (!currentUser) return alert("請先登入！");
     try {
         await addDoc(collection(db, "recurring_events"), {
             uid: currentUser.uid,
             name: name,
             dayOfWeek: dayOfWeek,
+            category: category || 'default', // <-- 儲存分類
             startTime: "",
             endTime: "",
             description: "",
@@ -363,8 +365,9 @@ newEventInput.addEventListener('keypress', (e) => { if(e.key==='Enter') addEvent
 
 addRecurringBtn.addEventListener('click', () => {
     const val = recurringEventInput.value.trim();
+    const cat = recurringCategorySelect.value; // 取得選單的值
     if(val) {
-        addRecurringEventToDB(val, parseInt(recurringDaySelect.value));
+        addRecurringEventToDB(val, parseInt(recurringDaySelect.value), cat); // 傳進去
         recurringEventInput.value = '';
     }
 });
@@ -468,6 +471,7 @@ function renderPlacedEvents() {
             const isException = recur.exceptions && recur.exceptions.includes(date);
             if (recur.dayOfWeek === dayOfWeek && !isException) {
                 const div = document.createElement('div');
+                div.classList.add(`cat-${recur.category || 'default'}`);
                 div.classList.add('placed-recurring-event');
                 div.textContent = recur.name;
                 div.addEventListener('click', (e) => {
@@ -796,4 +800,162 @@ function updateThemeIcon(theme) {
     themeToggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
 }
 
+// --- 統計功能區塊 ---
 
+const showStatsBtn = document.getElementById('showStatsBtn');
+const statsBackdrop = document.getElementById('stats-modal-backdrop');
+const statsCloseBtn = document.getElementById('stats-close-btn');
+let myChart = null; // 用來存儲圖表實例，避免重複繪製
+
+// 綁定按鈕事件
+showStatsBtn.addEventListener('click', () => {
+    calculateAndRenderStats();
+    statsBackdrop.classList.remove('hidden');
+});
+
+statsCloseBtn.addEventListener('click', () => {
+    statsBackdrop.classList.add('hidden');
+});
+
+statsBackdrop.addEventListener('click', (e) => {
+    if (e.target === statsBackdrop) statsBackdrop.classList.add('hidden');
+});
+
+// 繪圖函數 
+function calculateAndRenderStats() {
+    const stats = {
+        'work': 0,
+        'personal': 0,
+        'learning': 0,
+        'important': 0,
+        'default': 0
+    };
+
+    const colors = {
+        'work': '#5e60ce',
+        'personal': '#00b894',
+        'learning': '#fdcb6e',
+        'important': '#ff7675',
+        'default': '#8bb2f1'
+    };
+
+    const labels = {
+        'work': '工作',
+        'personal': '個人',
+        'learning': '學習',
+        'important': '重要',
+        'default': '一般'
+    };
+
+
+    const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+    const chartTextColor = isDarkMode ? '#ffffff' : '#333333'; 
+    const chartBorderColor = isDarkMode ? '#2d2d44' : '#ffffff';
+
+    // 獲取當前月份的天數範圍
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    
+    function getDuration(start, end) {
+        if (!start || !end) return 0;
+        const [sh, sm] = start.split(':').map(Number);
+        const [eh, em] = end.split(':').map(Number);
+        const startMin = sh * 60 + sm;
+        const endMin = eh * 60 + em;
+        return Math.max(0, endMin - startMin);
+    }
+
+    // 計算一般事件
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        if (placedEvents[dateStr]) {
+            placedEvents[dateStr].forEach(ev => {
+                const duration = getDuration(ev.startTime, ev.endTime);
+                const cat = ev.category || 'default';
+                if (stats[cat] !== undefined) stats[cat] += duration;
+            });
+        }
+    }
+
+    // 計算固定事件
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const dayOfWeek = new Date(dateStr).getDay();
+
+        recurringEvents.forEach(recur => {
+            const isException = recur.exceptions && recur.exceptions.includes(dateStr);
+            if (recur.dayOfWeek === dayOfWeek && !isException) {
+                const duration = getDuration(recur.startTime, recur.endTime);
+                const cat = recur.category || 'default';
+                if (stats[cat] !== undefined) stats[cat] += duration;
+            }
+        });
+    }
+
+    // 準備圖表數據
+    const dataValues = [];
+    const bgColors = [];
+    const labelTexts = [];
+    let totalMinutes = 0;
+
+    for (const [key, minutes] of Object.entries(stats)) {
+        if (minutes > 0) {
+            dataValues.push((minutes / 60).toFixed(1));
+            bgColors.push(colors[key]);
+            labelTexts.push(labels[key]);
+            totalMinutes += minutes;
+        }
+    }
+
+    const totalHours = (totalMinutes / 60).toFixed(1);
+    const totalDisplay = document.getElementById('total-hours-display');
+    if(totalDisplay) {
+        totalDisplay.style.color = 'var(--text-color)'; 
+        totalDisplay.innerHTML = `本月總計：<span style="color:${isDarkMode ? '#a29bfe' : '#6c5ce7'}; font-size:1.2em;">${totalHours}</span> 小時`;
+    }
+
+    // 繪製 Chart.js 圖表
+    const ctx = document.getElementById('statsChart').getContext('2d');
+    
+    if (myChart) {
+        myChart.destroy();
+    }
+
+    myChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labelTexts,
+            datasets: [{
+                data: dataValues,
+                backgroundColor: bgColors,
+                borderWidth: 2,
+                borderColor: chartBorderColor 
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: chartTextColor, 
+                        font: {
+                            family: "'Noto Sans TC', sans-serif",
+                            size: 14
+                        },
+                        padding: 20
+                    }
+                },
+                tooltip: {
+                    bodyColor: '#fff',
+                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    callbacks: {
+                        label: function(context) {
+                            return ` ${context.label}: ${context.raw} 小時`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}

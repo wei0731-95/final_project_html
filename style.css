@@ -337,7 +337,17 @@ button { font-family: inherit; }
     cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: filter 0.2s;
 }
 .placed-event:hover { filter: brightness(1.1); }
-.placed-recurring-event { background-color: #55efc4; color: #2d3436; border-left: 3px solid #00b894; }
+/* 請找到這段並修改 */
+.placed-recurring-event {
+    
+    color: white; /* 改成白色文字 */
+    border-left: 5px solid rgba(0,0,0,0.2); 
+    
+    /* 以下保留 */
+    font-size: 0.8em; padding: 3px 8px;
+    border-radius: 4px; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: filter 0.2s;
+}
 .calendar-day.drag-over { background-color: rgba(140, 122, 230, 0.2); border: 2px dashed var(--primary-color); transform: scale(0.98); }
 
 /* --- Modal 彈窗 */
@@ -360,7 +370,6 @@ button { font-family: inherit; }
     /* 強力模糊 */
     color: var(--text-color);
 }
-/* 深色模式彈窗調低透明度，不然文字看不清楚 */
 [data-theme="dark"] #event-modal { background-color: rgba(30, 30, 46, 0.9); }
 
 @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
@@ -485,9 +494,7 @@ button { font-family: inherit; }
     padding: 10px;
 }
 
-/* 事件分類標籤顏色系統 */
 
-/* 1. 定義分類顏色變數 (方便統一管理) */
 :root {
     --cat-default: #8bb2f1; /* 預設藍 */
     --cat-work: #5e60ce;    /* 深藍紫 (工作) */
@@ -496,16 +503,15 @@ button { font-family: inherit; }
     --cat-learning: #fdcb6e;/* 黃色 (學習) */
 }
 
-/* 2. 行事曆上的小膠囊 (Pills) 樣式 */
 .placed-event.cat-default { background-color: var(--cat-default); }
 .placed-event.cat-work { background-color: var(--cat-work); }
 .placed-event.cat-personal { background-color: var(--cat-personal); }
 .placed-event.cat-important { background-color: var(--cat-important); }
-.placed-event.cat-learning { background-color: var(--cat-learning); color: #2d3436; /* 黃色背景配深字比較清楚 */ }
+.placed-event.cat-learning { background-color: var(--cat-learning); color: #2d3436;  }
 
-/* 3. 左側列表卡片 (List Items) 樣式 */
+/* 左側列表卡片樣式 */
 
-.draggable-event { border-left-width: 5px; } /* 加粗左邊框 */
+.draggable-event { border-left-width: 5px; } 
 
 .draggable-event.cat-default { border-left-color: var(--cat-default); }
 .draggable-event.cat-work { border-left-color: var(--cat-work); }
@@ -513,7 +519,6 @@ button { font-family: inherit; }
 .draggable-event.cat-important { border-left-color: var(--cat-important); }
 .draggable-event.cat-learning { border-left-color: var(--cat-learning); }
 
-/* 4. 分類選單的美化 (讓它跟時間選單一樣漂亮) */
 .category-select {
     width: 100%;
     padding: 10px;
@@ -533,7 +538,6 @@ button { font-family: inherit; }
     color: white;
 }
 
-/* 側邊欄快速新增區優化 */
 .event-creator {
     display: flex;       
     gap: 5px;            
@@ -546,14 +550,13 @@ button { font-family: inherit; }
     width: auto; 
 }
 
-/* 快速選單的小圓點樣式 */
 .quick-select {
     width: 85px;        
     height: 40px;        
     padding: 0 5px;
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
-    background-color: rgba(255, 255, 255, 0.2); /* 半透明 */
+    background-color: rgba(255, 255, 255, 0.2); 
     color: var(--text-color);
     cursor: pointer;
     font-size: 1.2rem;   
@@ -567,12 +570,112 @@ button { font-family: inherit; }
     border-color: var(--primary-color);
 }
 
-/* 深色模式微調 */
 [data-theme="dark"] .quick-select {
     background-color: rgba(0, 0, 0, 0.3);
     color: white;
     border-color: rgba(255, 255, 255, 0.2);
 }
 [data-theme="dark"] .quick-select option {
-    background-color: #2d2d44; /* 選單展開後的背景色 */
+    background-color: #2d2d44; 
+}
+
+
+.modal-form-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-form-content label {
+    display: block;          
+    margin-top: 15px;       
+    margin-bottom: 8px;     
+    font-weight: 500;       
+    color: var(--text-color);
+    font-size: 0.95em;
+}
+
+.modal-form-content > label:first-of-type {
+    margin-top: 0;
+}
+
+.modal-form-content input[type="text"],
+.modal-form-content select,
+.modal-form-content textarea {
+    width: 100%;             
+    box-sizing: border-box;  
+}
+
+#modal-event-desc {
+    resize: none;           
+    height: 100px;          
+    margin-bottom: 10px;     
+    line-height: 1.5;        
+}
+
+.time-inputs {
+    margin-top: 15px;     
+}
+
+.time-inputs label {
+    margin-top: 0; 
+}
+
+
+.modal-create-action {
+    display: flex;
+    justify-content: center; 
+    margin: 20px 0;          
+    width: 100%;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: center; 
+    margin-top: 20px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color); 
+    width: 100%;
+}
+
+#show-create-form-btn, #modal-close-btn {
+    min-width: 120px; 
+}
+
+
+
+.message-modal-content {
+    width: 400px;            
+    max-width: 90%;         
+    min-height: 200px;       
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: center; 
+    align-items: center;     
+    
+    padding: 30px;           
+    text-align: center;      
+}
+
+#msg-title {
+    font-size: 1.4em;
+    margin-bottom: 15px;
+    color: var(--text-color);
+}
+
+#msg-body {
+    font-size: 1.1em;
+    color: var(--text-light);
+    margin-bottom: 25px;
+    line-height: 1.6;
+}
+
+.message-modal-content .modal-actions {
+    width: 100%;
+    gap: 15px; 
+}
+
+#msg-confirm-btn, #msg-cancel-btn {
+    padding: 10px 30px;
+    font-size: 1em;
 }

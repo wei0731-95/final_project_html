@@ -6,6 +6,7 @@
     <title>質感拖曳行事曆</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
         <div class="auth-section">
@@ -43,6 +44,15 @@
             <h2 class="sidebar-subtitle">每週固定行程</h2>
             <div class="recurring-creator">
                 <input type="text" id="recurringEventInput" placeholder="行程名稱...">
+                
+                <select id="recurringCategorySelect" class="quick-select" title="選擇分類">
+                    <option value="default">🔵一般</option> 
+                    <option value="work">🔷工作</option>    
+                    <option value="personal">🟢個人</option> 
+                    <option value="important">🔴重要</option>
+                    <option value="learning">🟡學習</option> 
+                </select>
+
                 <select id="recurringDaySelect">
                     <option value="0">週日</option>
                     <option value="1">週一</option>
@@ -54,8 +64,11 @@
                 </select>
                 <button id="addRecurringBtn">加入循環</button>
             </div>
-            <div class="recurring-event-list" id="recurringEventList">
-                </div>
+            
+            <div class="recurring-event-list" id="recurringEventList"></div>
+            <button id="showStatsBtn" style="margin-top: 15px; width: 100%; background: #6c5ce7; color: white; padding: 10px; border: none; border-radius: 8px; cursor: pointer;">
+                📊 查看本月統計
+            </button>
         </aside>
 
         <main class="calendar-section">
@@ -111,6 +124,7 @@
                     </div>
                 </div>
 
+
                 <label for="modal-event-desc">備註:</label>
                 <textarea id="modal-event-desc" rows="3" placeholder="輸入備註..."></textarea>
             </div>
@@ -132,6 +146,23 @@
             <div class="modal-actions" style="justify-content: center; margin-top: 20px;">
                 <button id="msg-cancel-btn" style="background-color: #f0f2f5; color: #666; margin-right: 10px;">取消</button>
                 <button id="msg-confirm-btn">確定</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="stats-modal-backdrop" class="modal-backdrop hidden">
+        <div id="stats-modal-content" style="background: var(--glass-bg); padding: 30px; border-radius: 20px; border: 1px solid var(--glass-border); width: 400px; max-width: 90%; text-align: center; position: relative;">
+            <h3 style="margin-bottom: 20px; color: var(--text-color);">本月時間分佈</h3>
+            
+            <div style="position: relative; height: 300px; width: 100%;">
+                <canvas id="statsChart"></canvas>
+            </div>
+
+            <div id="total-hours-display" style="margin-top: 20px; font-weight: bold; color: var(--text-color);">
+                </div>
+
+            <div class="modal-actions" style="justify-content: center; margin-top: 20px;">
+                <button id="stats-close-btn" style="background-color: var(--primary-color); color: white;">關閉</button>
             </div>
         </div>
     </div>
