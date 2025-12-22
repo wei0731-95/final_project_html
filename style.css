@@ -626,39 +626,39 @@ input:focus, select:focus, textarea:focus {
     .calendar-grid { grid-auto-rows: minmax(80px, 1fr); gap: 8px; }
 }
 .recurring-event-item {
-    background-color: rgba(255, 118, 117, 0.12) !important; 
-    border: 1px solid rgba(255, 118, 117, 0.3) !important;
-    border-left: 6px solid #ff7675 !important; 
-    color: #c0392b !important; 
+    background-color: rgba(0, 206, 201, 0.12) !important; 
+    border: 1px solid rgba(0, 206, 201, 0.3) !important;
+    border-left: 6px solid #00cec9 !important; 
+    color: #008c8c !important; /* 深青色文字，確保可讀性 */
 }
 
 .recurring-event-item:hover {
-    background-color: rgba(255, 118, 117, 0.25) !important;
+    background-color: rgba(0, 206, 201, 0.25) !important;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(255, 118, 117, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 206, 201, 0.2);
 }
 
-
+/* 深色模式 Dark Mode */
 [data-theme="dark"] .recurring-event-item {
-    background-color: rgba(255, 118, 117, 0.15) !important;
-    border: 1px solid rgba(255, 118, 117, 0.2) !important;
-    border-left: 6px solid #ff7675 !important;
-    color: #ff7675 !important; 
+    background-color: rgba(0, 206, 201, 0.15) !important;
+    border: 1px solid rgba(0, 206, 201, 0.2) !important;
+    border-left: 6px solid #00cec9 !important;
+    color: #81ecec !important; /* 淺青色文字 */
 }
+
 [data-theme="dark"] .recurring-event-item:hover {
-    background-color: rgba(255, 118, 117, 0.25) !important;
+    background-color: rgba(0, 206, 201, 0.25) !important;
 }
 
-
-
+/* 行事曆上的小標籤 */
 .placed-recurring-event {
-    background-color: #ff7675 !important; 
+    background-color: #00cec9 !important; 
     color: white !important;
     border-left: none !important; 
-    box-shadow: 0 2px 5px rgba(255, 118, 117, 0.4);
+    box-shadow: 0 2px 5px rgba(0, 206, 201, 0.4);
 }
 
 .placed-recurring-event:hover {
-    background-color: #d63031 !important; 
+    background-color: #00b5b5 !important; /* Hover 時稍微變深 */
     filter: brightness(1.1);
 }
